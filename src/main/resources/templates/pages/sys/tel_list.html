@@ -1,0 +1,134 @@
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">
+
+                    菜单管理</h3>
+
+                <div class="box-tools">
+                    <div class="input-group input-group-sm" style="width: 100px;">
+                        <div class="input-group-btn">
+
+                            <button type="button"
+                                    class="btn btn-success btn-delete">
+                                删除</button>
+                            <button type="button" class="btn btn-default btn-add">添加</button>
+                            <button type="button" class="btn btn-default btn-update">修改</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive no-padding">
+                <table id="menuTable" class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th data-field="selectItem" data-checkbox="true"></th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+
+            <div class="box-body table-responsive no-padding">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>部门</th>
+                        <th>邮箱</th>
+                        <th>手机号</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>修改时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbodyId"></tbody>
+                </table>
+            </div>
+            <div id="pageId" class="box-footer clearfix">
+            </div>
+        </div>
+        <!-- /.box -->
+    </div>
+</div>
+<script type="text/javascript" src="bower_components/treegrid/jquery.treegrid.extension.js"></script>
+<script type="text/javascript" src="bower_components/treegrid/jquery.treegrid.min.js"></script>
+<script type="text/javascript" src="bower_components/treegrid/tree.table.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function(){
+        $("#pageId").load("doPageUI",function(){
+            doGetObjects();
+        });
+        $(".input-group-btn")
+            .on("click",".btn-search",doQueryObjects)
+    });
+
+    function doQueryObjects(){
+        $("#pageId").data("pageCurrent",1);
+        doGetObjects();
+    }
+
+
+    function doGetObjects(){
+      //  $("#checkAll").prop("checked",false);
+        //debugger
+        //1.定义请求参数
+        var pageCurrent=$("#pageId").data("pageCurrent");
+        if(!pageCurrent)pageCurrent=1;
+        var params={"pageCurrent":pageCurrent};
+        var uname=$("#searchNameId").val();
+        if(uname)params.username=uname;
+        //2.定义请求的url
+        var url="tel/doFindTel";
+        //3.发送异步请求加载日志数据
+        //1)getJSON为Jquery框架中的函数
+        //2)getJson用于向服务端发起Get请求
+        //3)getJSON会将服务端返回的JSON串直接转换为JSON格式的JS对象
+        //4)function(result){}会在服务端数据响应到客户端以后执行
+        $.getJSON(url,params,function(result){//jsonResult
+            console.log("result",result)
+            //处理查询结果
+            doHandleResponseResult(result);
+        });
+    }
+
+    function doHandleResponseResult(result){
+        if(result.state==1){
+            doSetTableBodyRows(result.data.records);
+            doSetPagination(result.data);
+        }else{
+            alert(result.message);
+        }
+    }
+
+    function doSetTableBodyRows(data){
+        //1.获取tbody对象，并清空内容
+        var tBody=$("#tbodyId");
+        tBody.empty();
+        //2.迭代data内容将数据追加到tbody中
+        for(var i in data){
+            var tr=$("<tr></tr>");
+            tr.data("rowData",data[i]);
+            var tds=doCreateTds(data[i]);
+            tr.append(tds);
+            tBody.append(tr);
+        }
+    }
+
+    function doCreateTds(data){
+        var tds="<td><input type='checkbox' class='cBox' name='cItem' value='"+data.id+"'></td>"+
+            "<td>"+data.id+"</td>"+
+            "<td>"+data.name+"</td>"+
+            "<td>"+data.tel+"</td>"+
+            "<td>"+data.telType+"</td>"+
+            "<td>"+data.pay+"</td>"+
+            "<td>"+data.pid+"</td>"+
+            "<td>"+data.completeTime+"</td>+"
+            "<td>"+data.remark+"</td>";
+        return tds;
+    }
+</script>
